@@ -3,9 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <title>Kichong.xyz</title>
+    <style>
+        /* Overall Page Styling */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #333;
+            margin: 0;
+            color: #fff;
+            font-family: Arial, sans-serif;
+        }
+        
+        /* Symbols Container */
+        .symbols {
+            display: grid;
+            grid-template-areas: 
+                ". triangle ."
+                "square . circle"
+                ". x .";
+            gap: 20px;
+            text-align: center;
+        }
+
+        /* Symbol Styling */
+        .symbol {
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 50%; /* only affects circle */
+        }
+
+        /* Individual Symbol Customizations */
+        .triangle {
+            grid-area: triangle;
+            color: green;
+            font-size: 2.5em;
+        }
+
+        .square {
+            grid-area: square;
+            background-color: blue;
+        }
+
+        .circle {
+            grid-area: circle;
+            background-color: red;
+        }
+
+        .x {
+            grid-area: x;
+            color: pink;
+            font-size: 2.5em;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome to Kichong.xyz</h1>
-    <p>This is a static page powered by GitHub Pages.</p>
+    <div class="symbols">
+        <a href="link1.html" class="symbol triangle">▲</a>
+        <a href="link2.html" class="symbol square">■</a>
+        <a href="link3.html" class="symbol circle">●</a>
+        <a href="link4.html" class="symbol x">×</a>
+    </div>
 </body>
 </html>

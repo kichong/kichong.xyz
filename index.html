@@ -23,45 +23,45 @@
                 ". triangle ."
                 "square . circle"
                 ". x .";
-            gap: 20px;
+            gap: 50px; /* Increased spacing between symbols */
             text-align: center;
         }
 
         /* Symbol Styling */
         .symbol {
-            width: 80px;
-            height: 80px;
+            width: 100px; /* Slightly larger symbols */
+            height: 100px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2em;
-            color: white;
+            font-size: 2.5em;
             text-decoration: none;
             font-weight: bold;
-            border-radius: 50%; /* only affects circle */
+            border-radius: 50%; /* Only affects circle */
+            color: white;
         }
 
-        /* Individual Symbol Customizations */
+        /* Individual Symbol Customizations with PlayStation Colors */
         .triangle {
             grid-area: triangle;
-            color: green;
-            font-size: 2.5em;
+            color: #3edc81; /* Light green */
         }
 
         .square {
             grid-area: square;
-            background-color: blue;
+            background-color: #27a2f4; /* Light blue */
+            color: white;
         }
 
         .circle {
             grid-area: circle;
-            background-color: red;
+            background-color: #e83a45; /* Light red */
+            color: white;
         }
 
         .x {
             grid-area: x;
-            color: pink;
-            font-size: 2.5em;
+            color: #bd8cbf; /* Light purple */
         }
     </style>
 </head>

@@ -1,0 +1,16 @@
+{
+  "triangle": [
+    { "label": "Mirror.xyz", "href": "https://mirror.xyz/ethpapers.eth" }
+  ],
+  "square": [
+    { "label": "IngramSpark", "href": "https://ingram.ethpapers.xyz" },
+    { "label": "Amazon", "href": "https://amazon.ethpapers.xyz" },
+    { "label": "Indie California", "href": "https://library.ethpapers.xyz" }
+  ],
+  "circle": [
+    { "label": "EthereumGPT", "href": "https://chatgpt.com/g/g-k4yMyMJW0-ethereumgpt?model=gpt-5" }
+  ],
+  "cross": [
+    { "label": "Ki Chong Tran", "href": "https://kichong.xyz" }
+  ]
+}

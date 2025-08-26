@@ -1,22 +1,6 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-
-const LINK_MAP = {
-  triangle: [
-    { label: "Mirror.xyz", href: "https://mirror.xyz/ethpapers.eth" },
-  ],
-  square: [
-    { label: "IngramSpark", href: "https://ingram.ethpapers.xyz" },
-    { label: "Amazon", href: "https://amazon.ethpapers.xyz" },
-    { label: "Indie California", href: "https://library.ethpapers.xyz" },
-  ],
-  circle: [
-    { label: "EthereumGPT", href: "https://chatgpt.com/g/g-k4yMyMJW0-ethereumgpt?model=gpt-5" },
-  ],
-  cross: [
-    { label: "Ki Chong Tran", href: "https://kichong.xyz" },
-  ],
-};
+import LINK_MAP from "./LINK_MAP.json";
 
 const GLOW = "rgba(140,255,200,0.9)";
 
@@ -40,9 +24,7 @@ const Panel = ({ items, mobile, title }) => (
     transition={{ type: "spring", stiffness: 320, damping: 28 }}
     className={
       "pointer-events-auto rounded-2xl bg-black/85 p-4 backdrop-blur-md border border-emerald-300/30 shadow-[0_0_30px_rgba(140,255,200,0.25)] " +
-      (mobile
-        ? "w-[min(26rem,calc(100vw-2rem))]"
-        : "w-[min(18rem,calc(100vw-3rem))]")
+      (mobile ? "w-[min(26rem,calc(100vw-2rem))]" : "w-[min(18rem,calc(100vw-3rem))]")
     }
     role="menu"
   >
@@ -69,9 +51,7 @@ const Panel = ({ items, mobile, title }) => (
 const Glow = ({ className }) => (
   <div
     className={`absolute inset-0 blur-xl opacity-70 ${className || ""}`}
-    style={{
-      boxShadow: `0 0 60px 10px ${GLOW}, inset 0 0 40px ${GLOW}`,
-    }}
+    style={{ boxShadow: `0 0 60px 10px ${GLOW}, inset 0 0 40px ${GLOW}` }}
   />
 );
 
@@ -79,12 +59,7 @@ function ShapeTriangle() {
   return (
     <div className="relative w-32 h-32 md:w-40 md:h-40">
       <svg viewBox="0 0 100 100" className="w-full h-full">
-        <polygon
-          points="50,10 90,80 10,80"
-          fill="none"
-          strokeWidth="4"
-          stroke="url(#grad)"
-        />
+        <polygon points="50,10 90,80 10,80" fill="none" strokeWidth="4" stroke="url(#grad)" />
         <defs>
           <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor={GLOW} />
@@ -101,15 +76,7 @@ function ShapeSquare() {
   return (
     <div className="relative w-32 h-32 md:w-40 md:h-40">
       <svg viewBox="0 0 100 100" className="w-full h-full">
-        <rect
-          x="10"
-          y="10"
-          width="80"
-          height="80"
-          fill="none"
-          strokeWidth="4"
-          stroke={GLOW}
-        />
+        <rect x="10" y="10" width="80" height="80" fill="none" strokeWidth="4" stroke={GLOW} />
       </svg>
       <Glow />
     </div>
@@ -183,9 +150,7 @@ const ControllerNode = ({ shape, items, anchor, title }) => {
 
       <AnimatePresence>
         {open && (
-          <div
-            className={(isMobile ? mobilePos : `absolute ${panelPos}`) + " pointer-events-none"}
-          >
+          <div className={(isMobile ? mobilePos : `absolute ${panelPos}`) + " pointer-events-none"}>
             <Panel items={items} mobile={isMobile} title={title} />
           </div>
         )}
@@ -238,7 +203,7 @@ export default function App() {
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent,rgba(0,0,0,0.7))]" />
 
       <footer className="relative z-10 px-4 md:px-6 py-10 text-xs text-emerald-300/40 font-mono">
-        Hover or tap a shape to reveal links. Edit LINK_MAP in code to set destinations.
+        Hover or tap a shape to reveal links.
       </footer>
     </main>
   );

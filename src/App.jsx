@@ -1,17 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-/*
-  EthPapers Landing
-  - Dark, game-like grid inspired by MGS vibes
-  - Four glowing buttons in a PlayStation layout: Triangle (top), Square (left), Circle (right), X (bottom)
-  - Hover or tap reveals a mini menu for each shape
-  - Edit the link labels/URLs in LINK_MAP
-  - Static-site friendly
-*/
-
-// ------------------------- CONFIG -------------------------
-const LINK_MAP: Record<ShapeKey, { label: string; href: string }[]> = {
+const LINK_MAP = {
   triangle: [
     { label: "Mirror.xyz", href: "https://mirror.xyz/ethpapers.eth" },
   ],
@@ -28,11 +18,8 @@ const LINK_MAP: Record<ShapeKey, { label: string; href: string }[]> = {
   ],
 };
 
-const GLOW = "rgba(140,255,200,0.9)"; // soft mint
+const GLOW = "rgba(140,255,200,0.9)";
 
-type ShapeKey = "triangle" | "square" | "circle" | "cross";
-
-// ------------------------- HOOKS -------------------------
 function useIsMobile() {
   const [m, setM] = React.useState(false);
   React.useEffect(() => {
@@ -45,60 +32,63 @@ function useIsMobile() {
   return m;
 }
 
-// ------------------------- SHARED UI -------------------------
-const Panel: React.FC<{ items: { label: string; href: string }[]; mobile?: boolean; title?: string }>
-  = ({ items, mobile, title }) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 6 }}
-      transition={{ type: "spring", stiffness: 320, damping: 28 }}
-      className={
-        "pointer-events-auto rounded-2xl bg-black/85 p-4 backdrop-blur-md border border-emerald-300/30 shadow-[0_0_30px_rgba(140,255,200,0.25)] " +
-        (mobile
-          ? "w-[min(26rem,calc(100vw-2rem))]"
-          : "w-[min(18rem,calc(100vw-3rem))]")
-      }
-      role="menu"
-    >
-      {title && (
-        <div className="mb-2 text-emerald-200/90 text-xs tracking-widest uppercase">
-          {title}
-        </div>
-      )}
-      <ul className="space-y-2">
-        {items.map((it) => (
-          <li key={it.label}>
-            <a
-              href={it.href}
-              className="block rounded-lg border border-emerald-400/10 bg-emerald-100/0 px-3 py-2 text-emerald-100/90 hover:bg-emerald-400/5 hover:text-emerald-100 transition"
-            >
-              {it.label}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </motion.div>
-  );
-};
-
-const Glow: React.FC<{ className?: string }>= ({ className }) => (
-  <div className={`absolute inset-0 blur-xl opacity-70 ${className||""}`} style={{
-    boxShadow: `0 0 60px 10px ${GLOW}, inset 0 0 40px ${GLOW}`,
-  }} />
+const Panel = ({ items, mobile, title }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 8 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 6 }}
+    transition={{ type: "spring", stiffness: 320, damping: 28 }}
+    className={
+      "pointer-events-auto rounded-2xl bg-black/85 p-4 backdrop-blur-md border border-emerald-300/30 shadow-[0_0_30px_rgba(140,255,200,0.25)] " +
+      (mobile
+        ? "w-[min(26rem,calc(100vw-2rem))]"
+        : "w-[min(18rem,calc(100vw-3rem))]")
+    }
+    role="menu"
+  >
+    {title && (
+      <div className="mb-2 text-emerald-200/90 text-xs tracking-widest uppercase">
+        {title}
+      </div>
+    )}
+    <ul className="space-y-2">
+      {items.map((it) => (
+        <li key={it.label}>
+          <a
+            href={it.href}
+            className="block rounded-lg border border-emerald-400/10 bg-emerald-100/0 px-3 py-2 text-emerald-100/90 hover:bg-emerald-400/5 hover:text-emerald-100 transition"
+          >
+            {it.label}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </motion.div>
 );
 
-// ------------------------- SHAPES -------------------------
+const Glow = ({ className }) => (
+  <div
+    className={`absolute inset-0 blur-xl opacity-70 ${className || ""}`}
+    style={{
+      boxShadow: `0 0 60px 10px ${GLOW}, inset 0 0 40px ${GLOW}`,
+    }}
+  />
+);
+
 function ShapeTriangle() {
   return (
     <div className="relative w-32 h-32 md:w-40 md:h-40">
       <svg viewBox="0 0 100 100" className="w-full h-full">
-        <polygon points="50,10 90,80 10,80" fill="none" strokeWidth="4" stroke="url(#grad)"/>
+        <polygon
+          points="50,10 90,80 10,80"
+          fill="none"
+          strokeWidth="4"
+          stroke="url(#grad)"
+        />
         <defs>
           <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
             <stop offset="0%" stopColor={GLOW} />
-            <stop offset="100%" stopColor="white"/>
+            <stop offset="100%" stopColor="white" />
           </linearGradient>
         </defs>
       </svg>
@@ -111,7 +101,15 @@ function ShapeSquare() {
   return (
     <div className="relative w-32 h-32 md:w-40 md:h-40">
       <svg viewBox="0 0 100 100" className="w-full h-full">
-        <rect x="10" y="10" width="80" height="80" fill="none" strokeWidth="4" stroke={GLOW} />
+        <rect
+          x="10"
+          y="10"
+          width="80"
+          height="80"
+          fill="none"
+          strokeWidth="4"
+          stroke={GLOW}
+        />
       </svg>
       <Glow />
     </div>
@@ -131,22 +129,21 @@ function ShapeCircle() {
 
 function ShapeCross() {
   return (
-    <div className="relative w-44 h-44 md:w-52 md:h-52"> {/* bigger X */}
+    <div className="relative w-44 h-44 md:w-52 md:h-52">
       <svg viewBox="0 0 100 100" className="w-full h-full">
-        <path d="M20 38 L38 20 L50 32 L62 20 L80 38 L68 50 L80 62 L62 80 L50 68 L38 80 L20 62 L32 50 Z" fill="none" strokeWidth="4" stroke={GLOW} />
+        <path
+          d="M20 38 L38 20 L50 32 L62 20 L80 38 L68 50 L80 62 L62 80 L50 68 L38 80 L20 62 L32 50 Z"
+          fill="none"
+          strokeWidth="4"
+          stroke={GLOW}
+        />
       </svg>
       <Glow />
     </div>
   );
 }
 
-// Wrapper for each controller button with hover/tap menu
-const ControllerNode: React.FC<{
-  shape: ShapeKey;
-  items: { label: string; href: string }[];
-  anchor: "top" | "right" | "left" | "bottom";
-  title?: string;
-}> = ({ shape, items, anchor, title }) => {
+const ControllerNode = ({ shape, items, anchor, title }) => {
   const [open, setOpen] = React.useState(false);
   const isMobile = useIsMobile();
 
@@ -170,7 +167,7 @@ const ControllerNode: React.FC<{
     onMouseEnter: () => !isMobile && setOpen(true),
     onMouseLeave: () => !isMobile && setOpen(false),
     onClick: () => isMobile && setOpen((v) => !v),
-  } as any;
+  };
 
   return (
     <div className="group relative flex flex-col items-center justify-center" {...openOn}>
@@ -186,7 +183,9 @@ const ControllerNode: React.FC<{
 
       <AnimatePresence>
         {open && (
-          <div className={(isMobile ? mobilePos : `absolute ${panelPos}`) + " pointer-events-none"}>
+          <div
+            className={(isMobile ? mobilePos : `absolute ${panelPos}`) + " pointer-events-none"}
+          >
             <Panel items={items} mobile={isMobile} title={title} />
           </div>
         )}
@@ -195,20 +194,7 @@ const ControllerNode: React.FC<{
   );
 };
 
-// ------------------------- ROOT APP -------------------------
 export default function App() {
-  React.useEffect(() => {
-    const anchors: ShapeKey[] = ["triangle", "square", "circle", "cross"];
-    console.assert(Object.keys(LINK_MAP).length === 4, "LINK_MAP should have four keys");
-    anchors.forEach((k) => {
-      console.assert(Array.isArray(LINK_MAP[k]) && LINK_MAP[k].length >= 1, `LINK_MAP[${k}] should have items`);
-      LINK_MAP[k].forEach((it) => {
-        console.assert(typeof it.label === "string" && it.label.length > 0, `LINK_MAP[${k}] has empty label`);
-        console.assert(/^https?:\/\//.test(it.href) || it.href.startsWith("/"), `LINK_MAP[${k}] invalid href: ${it.href}`);
-      });
-    });
-  }, []);
-
   return (
     <main className="relative min-h-screen text-emerald-100 bg-black overflow-hidden">
       <div className="pointer-events-none absolute inset-0 opacity-30">
@@ -258,11 +244,10 @@ export default function App() {
   );
 }
 
-// ------------------------- DECOR -------------------------
-const GridDecor: React.FC = () => (
+const GridDecor = () => (
   <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
     <rect x="1" y="1" width="98" height="98" fill="none" stroke="rgba(140,255,200,0.6)" strokeWidth="0.6" />
-    {[25,50,75].map((p) => (
+    {[25, 50, 75].map((p) => (
       <g key={p}>
         <line x1={p} y1="1" x2={p} y2="99" stroke="rgba(140,255,200,0.2)" strokeWidth="0.4" />
         <line x1="1" y1={p} x2="99" y2={p} stroke="rgba(140,255,200,0.2)" strokeWidth="0.4" />
@@ -271,11 +256,15 @@ const GridDecor: React.FC = () => (
   </svg>
 );
 
-const Scanlines: React.FC = () => (
-  <div className="absolute inset-0" style={{
-    backgroundImage: "repeating-linear-gradient(0deg, rgba(140,255,200,0.12) 0px, rgba(140,255,200,0.12) 1px, rgba(0,0,0,0) 2px)",
-    animation: "scan 8s linear infinite",
-  }} />
+const Scanlines = () => (
+  <div
+    className="absolute inset-0"
+    style={{
+      backgroundImage:
+        "repeating-linear-gradient(0deg, rgba(140,255,200,0.12) 0px, rgba(140,255,200,0.12) 1px, rgba(0,0,0,0) 2px)",
+      animation: "scan 8s linear infinite",
+    }}
+  />
 );
 
 const style = document.createElement("style");

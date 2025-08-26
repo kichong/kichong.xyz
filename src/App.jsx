@@ -4,6 +4,40 @@ import LINK_MAP from "./LINK_MAP.json";
 
 const GLOW = "rgba(140,255,200,0.9)";
 
+// Fallback titles if JSON omits them
+const DEFAULT_TITLES = {
+  triangle: "NFTs",
+  square: "Books",
+  circle: "GPTs",
+  cross: "Author",
+};
+
+// Minimal error boundary so runtime errors don't blank the page
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error) { return { error }; }
+  componentDidCatch(error, info) { console.error("UI crash:", error, info); }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen bg-black text-red-200 p-6 font-mono">
+          <h2 className="text-lg mb-2">Something went wrong.</h2>
+          <pre className="text-xs whitespace-pre-wrap opacity-80">
+            {String(this.state.error?.message || this.state.error)}
+          </pre>
+          <button className="mt-4 underline" onClick={() => this.setState({ error: null })}>
+            Try again
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function useIsMobile() {
   const [m, setM] = React.useState(false);
   React.useEffect(() => {
@@ -16,37 +50,61 @@ function useIsMobile() {
   return m;
 }
 
-const Panel = ({ items, mobile, title }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 8 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: 6 }}
-    transition={{ type: "spring", stiffness: 320, damping: 28 }}
-    className={
-      "pointer-events-auto rounded-2xl bg-black/85 p-4 backdrop-blur-md border border-emerald-300/30 shadow-[0_0_30px_rgba(140,255,200,0.25)] " +
-      (mobile ? "w-[min(26rem,calc(100vw-2rem))]" : "w-[min(18rem,calc(100vw-3rem))]")
-    }
-    role="menu"
-  >
-    {title && (
-      <div className="mb-2 text-emerald-200/90 text-xs tracking-widest uppercase">
-        {title}
-      </div>
-    )}
-    <ul className="space-y-2">
-      {items.map((it) => (
-        <li key={it.label}>
-          <a
-            href={it.href}
-            className="block rounded-lg border border-emerald-400/10 bg-emerald-100/0 px-3 py-2 text-emerald-100/90 hover:bg-emerald-400/5 hover:text-emerald-100 transition"
-          >
-            {it.label}
-          </a>
-        </li>
-      ))}
-    </ul>
-  </motion.div>
-);
+// Accepts either Schema A: { title, items: [...] } or old array-only form: [...]
+function getGroup(key) {
+  const data = LINK_MAP[key];
+  if (Array.isArray(data)) {
+    return { title: DEFAULT_TITLES[key], items: data };
+  }
+  if (data && Array.isArray(data.items)) {
+    return { title: data.title || DEFAULT_TITLES[key], items: data.items };
+  }
+  console.warn(`[LINK_MAP] ${key} has invalid shape; expected array or {title, items:[...]}.`, data);
+  return { title: (data && data.title) || DEFAULT_TITLES[key], items: [] };
+}
+
+const Panel = ({ items, mobile, title }) => {
+  const safeItems = Array.isArray(items) ? items : [];
+  if (!Array.isArray(items)) {
+    console.warn("[LINK_MAP] 'items' was not an array. Falling back to empty list.", { items });
+  }
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: 6 }}
+      transition={{ type: "spring", stiffness: 320, damping: 28 }}
+      className={
+        "pointer-events-auto rounded-2xl bg-black/85 p-4 backdrop-blur-md border border-emerald-300/30 shadow-[0_0_30px_rgba(140,255,200,0.25)] " +
+        (mobile ? "w-[min(26rem,calc(100vw-2rem))]" : "w-[min(18rem,calc(100vw-3rem))]")
+      }
+      role="menu"
+    >
+      {title && (
+        <div className="mb-2 text-emerald-200/90 text-xs tracking-widest uppercase">
+          {title}
+        </div>
+      )}
+      <ul className="space-y-2">
+        {safeItems.map((it) => {
+          const external = /^https?:\/\//.test(it?.href || "");
+          return (
+            <li key={it?.label}>
+              <a
+                href={it?.href || "#"}
+                target={external ? "_blank" : undefined}
+                rel={external ? "noopener noreferrer" : undefined}
+                className="block rounded-lg border border-emerald-400/10 bg-emerald-100/0 px-3 py-2 text-emerald-100/90 hover:bg-emerald-400/5 hover:text-emerald-100 transition"
+              >
+                {it?.label || "(untitled)"}
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </motion.div>
+  );
+};
 
 const Glow = ({ className }) => (
   <div
@@ -160,52 +218,59 @@ const ControllerNode = ({ shape, items, anchor, title }) => {
 };
 
 export default function App() {
+  const TRI = getGroup("triangle");
+  const SQU = getGroup("square");
+  const CIR = getGroup("circle");
+  const CRO = getGroup("cross");
+
   return (
-    <main className="relative min-h-screen text-emerald-100 bg-black overflow-hidden">
-      <div className="pointer-events-none absolute inset-0 opacity-30">
-        <GridDecor />
-      </div>
-
-      <header className="relative z-10 flex items-center justify-between px-4 md:px-6 pt-6">
-        <h1 className="font-mono tracking-wider text-xs md:text-sm text-emerald-200/70">
-          ETHPAPERS.XYZ
-        </h1>
-        <div className="text-[10px] font-mono text-emerald-400/60">v0.1</div>
-      </header>
-
-      <section className="relative z-10 grid place-items-center pt-6 md:pt-10">
-        <div className="relative w-full max-w-[900px] aspect-[1.1] md:aspect-[1.4] mx-auto">
-          <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
-            <div />
-            <div className="flex items-center justify-center">
-              <ControllerNode shape="triangle" items={LINK_MAP.triangle} anchor="top" title="NFTs" />
-            </div>
-            <div />
-            <div className="flex items-center justify-center">
-              <ControllerNode shape="square" items={LINK_MAP.square} anchor="left" title="Books" />
-            </div>
-            <div />
-            <div className="flex items-center justify-center">
-              <ControllerNode shape="circle" items={LINK_MAP.circle} anchor="right" title="GPTs" />
-            </div>
-            <div />
-            <div className="flex items-center justify-center">
-              <ControllerNode shape="cross" items={LINK_MAP.cross} anchor="bottom" title="Author" />
-            </div>
-            <div />
-          </div>
+    <ErrorBoundary>
+      <main className="relative min-h-screen text-emerald-100 bg-black overflow-hidden">
+        <div className="pointer-events-none absolute inset-0 opacity-30">
+          <GridDecor />
         </div>
-      </section>
 
-      <div className="pointer-events-none absolute inset-0 mix-blend-screen opacity-25">
-        <Scanlines />
-      </div>
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent,rgba(0,0,0,0.7))]" />
+        <header className="relative z-10 flex items-center justify-between px-4 md:px-6 pt-6">
+          <h1 className="font-mono tracking-wider text-xs md:text-sm text-emerald-200/70">
+            ETHPAPERS.XYZ
+          </h1>
+          <div className="text-[10px] font-mono text-emerald-400/60">v0.1</div>
+        </header>
 
-      <footer className="relative z-10 px-4 md:px-6 py-10 text-xs text-emerald-300/40 font-mono">
-        Hover or tap a shape to reveal links.
-      </footer>
-    </main>
+        <section className="relative z-10 grid place-items-center pt-6 md:pt-10">
+          <div className="relative w-full max-w-[900px] aspect-[1.1] md:aspect-[1.4] mx-auto">
+            <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
+              <div />
+              <div className="flex items-center justify-center">
+                <ControllerNode shape="triangle" items={TRI.items} anchor="top" title={TRI.title} />
+              </div>
+              <div />
+              <div className="flex items-center justify-center">
+                <ControllerNode shape="square" items={SQU.items} anchor="left" title={SQU.title} />
+              </div>
+              <div />
+              <div className="flex items-center justify-center">
+                <ControllerNode shape="circle" items={CIR.items} anchor="right" title={CIR.title} />
+              </div>
+              <div />
+              <div className="flex items-center justify-center">
+                <ControllerNode shape="cross" items={CRO.items} anchor="bottom" title={CRO.title} />
+              </div>
+              <div />
+            </div>
+          </div>
+        </section>
+
+        <div className="pointer-events-none absolute inset-0 mix-blend-screen opacity-25">
+          <Scanlines />
+        </div>
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent,rgba(0,0,0,0.7))]" />
+
+        <footer className="relative z-10 px-4 md:px-6 py-10 text-xs text-emerald-300/40 font-mono">
+          Hover or tap a shape to reveal links.
+        </footer>
+      </main>
+    </ErrorBoundary>
   );
 }
 

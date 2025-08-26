@@ -232,7 +232,7 @@ export default function App() {
 
         <header className="relative z-10 flex items-center justify-between px-4 md:px-6 pt-6">
           <h1 className="font-mono tracking-wider text-xs md:text-sm text-emerald-200/70">
-            ETHPAPERS.XYZ
+            KICHONG.XYZ
           </h1>
           <div className="text-[10px] font-mono text-emerald-400/60">v0.1</div>
         </header>

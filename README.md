@@ -1,1 +1,3 @@
-edit src/LINK_MAP.json
+edit src/LINK_MAP.js
+
+

@@ -1,6 +1,6 @@
 import React from "react";
 import { motion as Motion, AnimatePresence } from "framer-motion";
-import LINK_MAP from "./LINK_MAP.json";
+import LINK_MAP from "./LINK_MAP.js";
 
 const GLOW = "rgba(140,255,200,0.9)";
 
@@ -50,24 +50,26 @@ function useIsMobile() {
   return m;
 }
 
-// Accepts either Schema A: { title, items: [...] } or old array-only form: [...]
+// Accepts either Schema A: { title, items: [...] } or Schema B: { title, sections: [{ subtitle, items: [...] }, ...] }
 function getGroup(key) {
   const data = LINK_MAP[key];
   if (Array.isArray(data)) {
     return { title: DEFAULT_TITLES[key], items: data };
   }
+  if (data && Array.isArray(data.sections)) {
+    return { title: data.title || DEFAULT_TITLES[key], sections: data.sections };
+  }
   if (data && Array.isArray(data.items)) {
     return { title: data.title || DEFAULT_TITLES[key], items: data.items };
   }
-  console.warn(`[LINK_MAP] ${key} has invalid shape; expected array or {title, items:[...]}.`, data);
+  console.warn(`[LINK_MAP] ${key} has invalid shape; expected array or {title, items:[...] or sections:[...]}.`, data);
   return { title: (data && data.title) || DEFAULT_TITLES[key], items: [] };
 }
 
-const Panel = ({ items, mobile, title }) => {
+const Panel = ({ items, sections, mobile, title }) => {
+  const hasSections = Array.isArray(sections);
   const safeItems = Array.isArray(items) ? items : [];
-  if (!Array.isArray(items)) {
-    console.warn("[LINK_MAP] 'items' was not an array. Falling back to empty list.", { items });
-  }
+
   return (
     <Motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -85,23 +87,57 @@ const Panel = ({ items, mobile, title }) => {
           {title}
         </div>
       )}
-      <ul className="space-y-2">
-        {safeItems.map((it) => {
-          const external = /^https?:\/\//.test(it?.href || "");
-          return (
-            <li key={it?.label}>
-              <a
-                href={it?.href || "#"}
-                target={external ? "_blank" : undefined}
-                rel={external ? "noopener noreferrer" : undefined}
-                className="block rounded-lg border border-emerald-400/10 bg-emerald-100/0 px-3 py-2 text-emerald-100/90 hover:bg-emerald-400/5 hover:text-emerald-100 transition"
-              >
-                {it?.label || "(untitled)"}
-              </a>
-            </li>
-          );
-        })}
-      </ul>
+
+      {!hasSections && (
+        <ul className="space-y-2">
+          {safeItems.map((it) => {
+            const external = /^https?:\/\//.test(it?.href || "");
+            return (
+              <li key={it?.label}>
+                <a
+                  href={it?.href || "#"}
+                  target={external ? "_blank" : undefined}
+                  rel={external ? "noopener noreferrer" : undefined}
+                  className="block rounded-lg border border-emerald-400/10 bg-emerald-100/0 px-3 py-2 text-emerald-100/90 hover:bg-emerald-400/5 hover:text-emerald-100 transition"
+                >
+                  {it?.label || "(untitled)"}
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
+      {hasSections && (
+        <div className="space-y-4">
+          {sections.map((sec, idx) => (
+            <div key={idx}>
+              {!!(sec.subtitle && String(sec.subtitle).trim()) && (
+                <div className="mb-1 text-[11px] text-emerald-200/80">
+                  {sec.subtitle}
+                </div>
+              )}
+              <ul className="space-y-2">
+                {(sec.items || []).map((it) => {
+                  const external = /^https?:\/\//.test(it?.href || "");
+                  return (
+                    <li key={it?.label}>
+                      <a
+                        href={it?.href || "#"}
+                        target={external ? "_blank" : undefined}
+                        rel={external ? "noopener noreferrer" : undefined}
+                        className="block rounded-lg border border-emerald-400/10 bg-emerald-100/0 px-3 py-2 text-emerald-100/90 hover:bg-emerald-400/5 hover:text-emerald-100 transition"
+                      >
+                        {it?.label || "(untitled)"}
+                      </a>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
     </Motion.div>
   );
 };
@@ -168,7 +204,7 @@ function ShapeCross() {
   );
 }
 
-const ControllerNode = ({ shape, items, anchor, title, active, setActive }) => {
+const ControllerNode = ({ shape, items, sections, anchor, title, active, setActive }) => {
   const isMobile = useIsMobile();
   const open = active === shape;
 
@@ -214,7 +250,7 @@ const ControllerNode = ({ shape, items, anchor, title, active, setActive }) => {
       <AnimatePresence>
         {open && (
           <div className={`absolute ${panelPos} pointer-events-none`}>
-            <Panel items={items} mobile={isMobile} title={title} />
+            <Panel items={items} sections={sections} mobile={isMobile} title={title} />
           </div>
         )}
       </AnimatePresence>
@@ -260,6 +296,7 @@ export default function App() {
                 <ControllerNode
                   shape="triangle"
                   items={TRI.items}
+                  sections={TRI.sections}
                   anchor="top"
                   title={TRI.title}
                   active={active}
@@ -271,6 +308,7 @@ export default function App() {
                 <ControllerNode
                   shape="square"
                   items={SQU.items}
+                  sections={SQU.sections}
                   anchor="left"
                   title={SQU.title}
                   active={active}
@@ -282,6 +320,7 @@ export default function App() {
                 <ControllerNode
                   shape="circle"
                   items={CIR.items}
+                  sections={CIR.sections}
                   anchor="right"
                   title={CIR.title}
                   active={active}
@@ -293,6 +332,7 @@ export default function App() {
                 <ControllerNode
                   shape="cross"
                   items={CRO.items}
+                  sections={CRO.sections}
                   anchor="bottom"
                   title={CRO.title}
                   active={active}
@@ -339,9 +379,3 @@ const Scanlines = () => (
     }}
   />
 );
-
-const style = document.createElement("style");
-style.innerHTML = `
-@keyframes scan { 0% { transform: translateY(0); } 100% { transform: translateY(-2px); } }
-`;
-document.head.appendChild(style);

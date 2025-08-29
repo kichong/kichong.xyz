@@ -4,14 +4,6 @@ import LINK_MAP from "./LINK_MAP.js";
 
 const GLOW = "rgba(140,255,200,0.9)";
 
-// Fallback titles if JSON omits them
-const DEFAULT_TITLES = {
-  triangle: "NFTs",
-  square: "Books",
-  circle: "GPTs",
-  cross: "Author",
-};
-
 // Minimal error boundary so runtime errors don't blank the page
 class ErrorBoundary extends React.Component {
   constructor(props) {

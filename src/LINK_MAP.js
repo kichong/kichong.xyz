@@ -30,7 +30,7 @@ export default {
       {
         subtitle: "Gemini's Cryptopedia",
         items: [
-          { label: "DeFi", href: "https://www.gemini.com/cryptopedia/explore#de-fi" }
+          { label: "DeFi Section", href: "https://www.gemini.com/cryptopedia/explore#de-fi" }
         ]
       },
       {

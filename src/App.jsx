@@ -69,7 +69,7 @@ function getGroup(key) {
 const Panel = ({ items, sections, mobile, title }) => {
   const hasSections = Array.isArray(sections);
   const safeItems = Array.isArray(items) ? items : [];
-
+  // Limit height so large menus stay within the viewport and enable scrolling
   return (
     <Motion.div
       initial={{ opacity: 0, y: 8 }}
@@ -77,7 +77,7 @@ const Panel = ({ items, sections, mobile, title }) => {
       exit={{ opacity: 0, y: 6 }}
       transition={{ type: "spring", stiffness: 320, damping: 28 }}
       className={
-        "pointer-events-auto rounded-2xl bg-black/85 p-4 backdrop-blur-md border border-emerald-300/30 shadow-[0_0_30px_rgba(140,255,200,0.25)] " +
+        "pointer-events-auto rounded-2xl bg-black/85 p-4 backdrop-blur-md border border-emerald-300/30 shadow-[0_0_30px_rgba(140,255,200,0.25)] max-h-[calc(100vh-4rem)] overflow-y-auto " +
         (mobile ? "w-[min(26rem,calc(100vw-2rem))]" : "w-[min(18rem,calc(100vw-3rem))]")
       }
       role="menu"

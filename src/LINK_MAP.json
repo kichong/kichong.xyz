@@ -9,8 +9,8 @@
     "title": "Ethereum Foundation (Privacy & Scaling Explorations)",
     "items": [
       { "label": "TLSNotary History", "href": "https://tlsnotary.org/blog/2025/08/08/tlsnotary-history" },
-      { "label": "Mirror.xyz Post 1", "href": "https://mirror.xyz/privacy-scaling-explorations.eth/xXcRj5QfvA_qhkiZCVg46Gn9uX8P_Ld-DXlqY51roPY" },
-      { "label": "Mirror.xyz Post 2", "href": "https://mirror.xyz/privacy-scaling-explorations.eth/I5BzurX-T6slFaPbA4i3hVrO7U2VkBR45eO-N3CSnSg" },
+      { "label": "Beyond Zero-Knowledge", "href": "https://mirror.xyz/privacy-scaling-explorations.eth/xXcRj5QfvA_qhkiZCVg46Gn9uX8P_Ld-DXlqY51roPY" },
+      { "label": "zkEVM", "href": "https://mirror.xyz/privacy-scaling-explorations.eth/I5BzurX-T6slFaPbA4i3hVrO7U2VkBR45eO-N3CSnSg" },
       { "label": "SNARK Fundamentals", "href": "https://erroldrummond.gitbook.io/snark-fundamentals" }
     ]
   },

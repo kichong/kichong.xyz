@@ -1,5 +1,5 @@
 import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 import LINK_MAP from "./LINK_MAP.json";
 
 const GLOW = "rgba(140,255,200,0.9)";
@@ -69,7 +69,7 @@ const Panel = ({ items, mobile, title }) => {
     console.warn("[LINK_MAP] 'items' was not an array. Falling back to empty list.", { items });
   }
   return (
-    <motion.div
+    <Motion.div
       initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: 6 }}
@@ -102,7 +102,7 @@ const Panel = ({ items, mobile, title }) => {
           );
         })}
       </ul>
-    </motion.div>
+    </Motion.div>
   );
 };
 
@@ -168,9 +168,9 @@ function ShapeCross() {
   );
 }
 
-const ControllerNode = ({ shape, items, anchor, title }) => {
-  const [open, setOpen] = React.useState(false);
+const ControllerNode = ({ shape, items, anchor, title, active, setActive }) => {
   const isMobile = useIsMobile();
+  const open = active === shape;
 
   const ShapeComp = {
     triangle: ShapeTriangle,
@@ -186,17 +186,22 @@ const ControllerNode = ({ shape, items, anchor, title }) => {
     bottom: "bottom-[calc(100%+16px)] left-1/2 -translate-x-1/2",
   }[anchor];
 
-  const mobilePos = "fixed left-1/2 -translate-x-1/2 bottom-20 z-50";
-
-  const openOn = {
-    onMouseEnter: () => !isMobile && setOpen(true),
-    onMouseLeave: () => !isMobile && setOpen(false),
-    onClick: () => isMobile && setOpen((v) => !v),
-  };
+  const handlers = isMobile
+    ? {
+        onClick: (e) => {
+          e.stopPropagation();
+          setActive(open ? null : shape);
+        },
+      }
+    : {
+        onMouseEnter: () => setActive(shape),
+        onMouseLeave: () => setActive(null),
+        onClick: (e) => e.stopPropagation(),
+      };
 
   return (
-    <div className="group relative flex flex-col items-center justify-center" {...openOn}>
-      <motion.div
+    <div className="group relative flex flex-col items-center justify-center" {...handlers}>
+      <Motion.div
         whileHover={{ scale: 1.06 }}
         whileTap={{ scale: 0.98 }}
         className="cursor-pointer select-none"
@@ -204,11 +209,11 @@ const ControllerNode = ({ shape, items, anchor, title }) => {
         aria-expanded={open}
       >
         <ShapeComp />
-      </motion.div>
+      </Motion.div>
 
       <AnimatePresence>
         {open && (
-          <div className={(isMobile ? mobilePos : `absolute ${panelPos}`) + " pointer-events-none"}>
+          <div className={`absolute ${panelPos} pointer-events-none`}>
             <Panel items={items} mobile={isMobile} title={title} />
           </div>
         )}
@@ -218,14 +223,24 @@ const ControllerNode = ({ shape, items, anchor, title }) => {
 };
 
 export default function App() {
+  const [active, setActive] = React.useState(null);
   const TRI = getGroup("triangle");
   const SQU = getGroup("square");
   const CIR = getGroup("circle");
   const CRO = getGroup("cross");
 
+  React.useEffect(() => {
+    const close = () => setActive(null);
+    window.addEventListener("resize", close);
+    return () => window.removeEventListener("resize", close);
+  }, []);
+
   return (
     <ErrorBoundary>
-      <main className="relative min-h-screen text-emerald-100 bg-black overflow-hidden">
+      <main
+        className="relative min-h-screen text-emerald-100 bg-black overflow-hidden"
+        onClick={() => setActive(null)}
+      >
         <div className="pointer-events-none absolute inset-0 opacity-30">
           <GridDecor />
         </div>
@@ -242,19 +257,47 @@ export default function App() {
             <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
               <div />
               <div className="flex items-center justify-center">
-                <ControllerNode shape="triangle" items={TRI.items} anchor="top" title={TRI.title} />
+                <ControllerNode
+                  shape="triangle"
+                  items={TRI.items}
+                  anchor="top"
+                  title={TRI.title}
+                  active={active}
+                  setActive={setActive}
+                />
               </div>
               <div />
               <div className="flex items-center justify-center">
-                <ControllerNode shape="square" items={SQU.items} anchor="left" title={SQU.title} />
+                <ControllerNode
+                  shape="square"
+                  items={SQU.items}
+                  anchor="left"
+                  title={SQU.title}
+                  active={active}
+                  setActive={setActive}
+                />
               </div>
               <div />
               <div className="flex items-center justify-center">
-                <ControllerNode shape="circle" items={CIR.items} anchor="right" title={CIR.title} />
+                <ControllerNode
+                  shape="circle"
+                  items={CIR.items}
+                  anchor="right"
+                  title={CIR.title}
+                  active={active}
+                  setActive={setActive}
+                />
               </div>
               <div />
               <div className="flex items-center justify-center">
-                <ControllerNode shape="cross" items={CRO.items} anchor="bottom" title={CRO.title} />
+                <ControllerNode
+                  shape="cross"
+                  items={CRO.items}
+                  anchor="bottom"
+                  title={CRO.title}
+                  active={active}
+                  setActive={setActive}
+                />
               </div>
               <div />
             </div>

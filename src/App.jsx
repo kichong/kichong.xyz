@@ -354,9 +354,6 @@ export default function App() {
         </div>
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent,rgba(0,0,0,0.7))]" />
 
-        <footer className="relative z-10 px-4 md:px-6 py-10 text-xs text-emerald-300/40 font-mono">
-          Hover or tap a shape to reveal links.
-        </footer>
       </main>
     </ErrorBoundary>
   );

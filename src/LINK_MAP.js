@@ -5,12 +5,13 @@ export default {
   triangle: {
     title: "TOOLS",
     items: [
-      { label: "Mindmapper", href: "https://mindmapper.kichong.xyz/" }
+      { label: "mindmapper", href: "https://mindmapper.kichong.xyz/" },
+      { label: "ethGPT", href: "https://chatgpt.com/g/g-k4yMyMJW0-ethgpt" }
     ]
   },
 
   square: {
-    title: "WORK",
+    title: "WORDS",
     sections: [
       {
         subtitle: "Ethereum Foundation (Privacy and Scaling Explorations)",

@@ -59,7 +59,7 @@ export default {
   },
 
   cross: {
-    title: "CONNECT",
+    title: "TALK",
     items: [
       { label: "Email", href: "mailto:kichong@ethpapers.xyz" }
     ]

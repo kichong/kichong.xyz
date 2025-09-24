@@ -11,7 +11,7 @@ export default {
   },
 
   square: {
-    title: "WORDS",
+    title: "WORK",
     sections: [
       {
         subtitle: "Ethereum Foundation (Privacy and Scaling Explorations)",
@@ -59,7 +59,7 @@ export default {
   },
 
   cross: {
-    title: "TALK",
+    title: "CHAT",
     items: [
       { label: "Email", href: "mailto:kichong@ethpapers.xyz" }
     ]

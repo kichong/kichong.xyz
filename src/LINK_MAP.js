@@ -61,7 +61,8 @@ export default {
   cross: {
     title: "CHAT",
     items: [
-      { label: "Email", href: "mailto:kichong@ethpapers.xyz" }
+      { label: "e-mail", href: "mailto:kichong@ethpapers.xyz" },
+      { label: "Discord @kichong", href: "https://discord.com/users/669106225773805578" }
     ]
   }
 };

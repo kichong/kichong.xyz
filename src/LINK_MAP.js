@@ -6,6 +6,7 @@ export default {
     title: "TOOLS",
     items: [
       { label: "mindmapper", href: "https://mindmapper.kichong.xyz/" },
+      { label: "TXT", href: "https://txt.ethpapers.xyz/" },
       { label: "ethGPT", href: "https://chatgpt.com/g/g-k4yMyMJW0-ethgpt" }
     ]
   },

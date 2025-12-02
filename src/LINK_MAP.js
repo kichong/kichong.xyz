@@ -7,12 +7,12 @@ export default {
     items: [
       { label: "mindmapper", href: "https://mindmapper.kichong.xyz/" },
       { label: "TXT", href: "https://txt.ethpapers.xyz/" },
-      { label: "ethGPT", href: "https://chatgpt.com/g/g-k4yMyMJW0-ethgpt" }
+      { label: "moneygame", href: "https://moneygamela.substack.com/" }
     ]
   },
 
   square: {
-    title: "WORK",
+    title: "JOBS",
     sections: [
       {
         subtitle: "Ethereum Foundation (Privacy and Scaling Explorations)",
@@ -55,14 +55,17 @@ export default {
   circle: {
     title: "ART",
     items: [
-      { label: "Ethereum Papers", href: "https://www.ethpapers.xyz" }
+      { label: "Ethereum Papers", href: "https://www.ethpapers.xyz" },
+      { label: "KCT", href: "https://kichongtran.substack.com/" }
     ]
   },
 
   cross: {
-    title: "CHAT",
+    title: "CONNECT",
     items: [
-      { label: "Email", href: "mailto:kichong@ethpapers.xyz" }
+      { label: "Email", href: "mailto:kichong@ethpapers.xyz" },
+      { label: "GitHub", href: "https://github.com/kichong" },
+      { label: "Upwork", href: "https://www.upwork.com/freelancers/~01bc0910579b37b62f" },
     ]
   }
 };

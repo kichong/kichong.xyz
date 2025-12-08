@@ -6,13 +6,12 @@ export default {
     title: "TOOLS",
     items: [
       { label: "mindmapper", href: "https://mindmapper.kichong.xyz/" },
-      { label: "TXT", href: "https://txt.ethpapers.xyz/" },
-      { label: "moneygame", href: "https://moneygamela.substack.com/" }
+      { label: "TXT", href: "https://txt.ethpapers.xyz/" }
     ]
   },
 
   square: {
-    title: "JOBS",
+    title: "WORDS",
     sections: [
       {
         subtitle: "Ethereum Foundation (Privacy and Scaling Explorations)",
@@ -21,6 +20,13 @@ export default {
           { label: "Beyond Zero-Knowledge", href: "https://mirror.xyz/privacy-scaling-explorations.eth/xXcRj5QfvA_qhkiZCVg46Gn9uX8P_Ld-DXlqY51roPY" },
           { label: "zkEVM", href: "https://mirror.xyz/privacy-scaling-explorations.eth/I5BzurX-T6slFaPbA4i3hVrO7U2VkBR45eO-N3CSnSg" },
           { label: "SNARK Fundamentals", href: "https://erroldrummond.gitbook.io/snark-fundamentals" }
+        ]
+      },
+      {
+        subtitle: "Substack",
+        items: [
+          { label: "moneygame.la", href: "https://moneygamela.substack.com/" },
+          { label: "Yang Gang Wisdom", href: "https://yanggangwisdom.substack.com/" },
         ]
       },
       {
@@ -40,17 +46,7 @@ export default {
         items: [
           { label: "Author Page", href: "https://blokt.com/author/ki-chong-tran/" }
         ]
-      },
-      {
-        subtitle: "ARC Hub PNH",
-        items: [
-          { label: "NBC News", href: "https://www.nbcnews.com/news/asian-america/cambodias-socially-driven-startup-scene-lures-entrepreneurs-n370621" },
-          { label: "Tech in Asia", href: "https://www.techinasia.com/brothers-paving-cambodias-3d-printing-revolution" },
-          { label: "Khmer Times", href: "https://www.khmertimeskh.com/25784/3d-printed-prosthetics-find-their-first-match/" }
-        ]
       }
-    ]
-  },
 
   circle: {
     title: "ART",

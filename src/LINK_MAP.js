@@ -46,7 +46,7 @@ export default {
         items: [
           { label: "Author Page", href: "https://blokt.com/author/ki-chong-tran/" }
         ]
-      }
+      },
 
   circle: {
     title: "ART",

@@ -1,4 +1,4 @@
-// LINK_MAP.js — JS module so we avoid JSON import quirks in Vite/Babel.
+// LINK_MAP.js - JS module so we avoid JSON import quirks in Vite/Babel.
 // Shape supports either { title, items: [...] } or { title, sections: [...] }.
 
 export default {
@@ -26,7 +26,7 @@ export default {
         subtitle: "Substack",
         items: [
           { label: "moneygame.la", href: "https://moneygamela.substack.com/" },
-          { label: "Yang Gang Wisdom", href: "https://yanggangwisdom.substack.com/" },
+          { label: "Yang Gang Wisdom", href: "https://yanggangwisdom.substack.com/" }
         ]
       },
       {
@@ -46,7 +46,9 @@ export default {
         items: [
           { label: "Author Page", href: "https://blokt.com/author/ki-chong-tran/" }
         ]
-      },
+      }
+    ]
+  },
 
   circle: {
     title: "ART",
@@ -61,7 +63,7 @@ export default {
     items: [
       { label: "Email", href: "mailto:kichong@ethpapers.xyz" },
       { label: "GitHub", href: "https://github.com/kichong" },
-      { label: "Upwork", href: "https://www.upwork.com/freelancers/~01bc0910579b37b62f" },
+      { label: "Upwork", href: "https://www.upwork.com/freelancers/~01bc0910579b37b62f" }
     ]
   }
 };

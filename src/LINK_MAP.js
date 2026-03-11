@@ -5,8 +5,10 @@ export default {
   triangle: {
     title: "TOOLS",
     items: [
+      { label: "ethGPT", href: "https://chatgpt.com/g/g-k4yMyMJW0-ethgpt" },
       { label: "mindmapper", href: "https://mindmapper.kichong.xyz/" },
-      { label: "TXT", href: "https://txt.ethpapers.xyz/" }
+      { label: "TXT", href: "https://txt.ethpapers.xyz/" },
+      { label: "TKN", href: "https://tkn.ethpapers.xyz/" }
     ]
   },
 

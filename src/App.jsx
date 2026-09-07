@@ -1,375 +1,225 @@
-import React from "react";
-import { motion as Motion, AnimatePresence } from "framer-motion";
-import LINK_MAP from "./LINK_MAP.js";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion as Motion } from "framer-motion";
+import { FiExternalLink, FiLogOut, FiPause, FiPlay, FiPlus, FiRotateCcw, FiTrash2, FiVolume2, FiVolumeX, FiX } from "react-icons/fi";
+import { FaGithub, FaLinkedinIn } from "react-icons/fa";
+import { SiSubstack } from "react-icons/si";
+import { supabase, supabaseConfigured } from "./lib/supabase";
+import CustomIcon from "./components/CustomIcon";
+import { CUSTOM_ICON_NAMES } from "./components/iconNames";
+import { useYouTubePlayer } from "./hooks/useYouTubePlayer";
 
-const GLOW = "rgba(140,255,200,0.9)";
+const DEFAULT_LINKS = [
+  { id: "ethpapers", label: "Ethereum Papers", url: "https://ethpapers.xyz/", icon: "ethpapers", sort_order: 0 },
+  { id: "substack", label: "Substack", url: "https://kichongtran.substack.com/", icon: "substack", sort_order: 1 },
+  { id: "github", label: "GitHub", url: "https://github.com/kichong", icon: "github", sort_order: 2 },
+  { id: "linkedin", label: "LinkedIn", url: "https://www.linkedin.com/in/kichongtran/", icon: "linkedin", sort_order: 3 },
+];
 
-// Minimal error boundary so runtime errors don't blank the page
-class ErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { error: null };
+const ORBIT_SECONDS = 44;
+const DEFAULT_MEDIA_URL = "https://www.youtube.com/watch?v=3G4kCi_ldr8";
+// The editor remains intact for a later iteration, but has no public entry point.
+const ENABLE_ADMIN = false;
+
+function buildEllipsePath(radiusX, radiusY, steps = 720) {
+  const points = [];
+  let length = 0;
+  let previous = { x: 0, y: -radiusY };
+  for (let step = 0; step <= steps; step += 1) {
+    const angle = -Math.PI / 2 + (step / steps) * Math.PI * 2;
+    const point = { x: Math.cos(angle) * radiusX, y: Math.sin(angle) * radiusY };
+    if (step > 0) length += Math.hypot(point.x - previous.x, point.y - previous.y);
+    points.push({ ...point, length });
+    previous = point;
   }
-  static getDerivedStateFromError(error) { return { error }; }
-  componentDidCatch(error, info) { console.error("UI crash:", error, info); }
-  render() {
-    if (this.state.error) {
-      return (
-        <div className="min-h-screen bg-black text-red-200 p-6 font-mono">
-          <h2 className="text-lg mb-2">Something went wrong.</h2>
-          <pre className="text-xs whitespace-pre-wrap opacity-80">
-            {String(this.state.error?.message || this.state.error)}
-          </pre>
-          <button className="mt-4 underline" onClick={() => this.setState({ error: null })}>
-            Try again
-          </button>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
+  return { points, length };
 }
 
-function useIsMobile() {
-  const [m, setM] = React.useState(false);
-  React.useEffect(() => {
-    const mq = window.matchMedia("(max-width: 768px)");
-    const sync = () => setM(mq.matches);
-    sync();
-    mq.addEventListener?.("change", sync);
-    return () => mq.removeEventListener?.("change", sync);
-  }, []);
-  return m;
+function pointAtDistance(path, distance) {
+  const target = ((distance % path.length) + path.length) % path.length;
+  let low = 0;
+  let high = path.points.length - 1;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if (path.points[middle].length < target) low = middle + 1;
+    else high = middle;
+  }
+  const next = path.points[low];
+  const previous = path.points[Math.max(0, low - 1)];
+  const span = next.length - previous.length || 1;
+  const mix = (target - previous.length) / span;
+  return { x: previous.x + (next.x - previous.x) * mix, y: previous.y + (next.y - previous.y) * mix };
 }
 
-// Accepts either Schema A: { title, items: [...] } or Schema B: { title, sections: [{ subtitle, items: [...] }, ...] }
-function getGroup(key) {
-  const data = LINK_MAP[key];
-  if (Array.isArray(data)) {
-    return { title: DEFAULT_TITLES[key], items: data };
-  }
-  if (data && Array.isArray(data.sections)) {
-    return { title: data.title || DEFAULT_TITLES[key], sections: data.sections };
-  }
-  if (data && Array.isArray(data.items)) {
-    return { title: data.title || DEFAULT_TITLES[key], items: data.items };
-  }
-  console.warn(`[LINK_MAP] ${key} has invalid shape; expected array or {title, items:[...] or sections:[...]}.`, data);
-  return { title: (data && data.title) || DEFAULT_TITLES[key], items: [] };
+function OrbitPlane({ children, count }) {
+  const planeRef = useRef(null);
+  useEffect(() => {
+    const plane = planeRef.current;
+    if (!plane) return undefined;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let frame;
+    const start = performance.now();
+    const positionItems = (now) => {
+      const path = buildEllipsePath(plane.clientWidth / 2, plane.clientHeight / 2);
+      const elapsed = reduceMotion ? 0 : (now - start) / 1000;
+      plane.querySelectorAll(".orbit-item").forEach((item) => {
+        const index = Number(item.dataset.orbitIndex);
+        const total = Math.max(1, Number(item.dataset.orbitTotal));
+        const distance = path.length * (index / total + elapsed / ORBIT_SECONDS);
+        const point = pointAtDistance(path, distance);
+        item.style.transform = `translate(${point.x}px, ${point.y}px)`;
+      });
+      if (!reduceMotion) frame = requestAnimationFrame(positionItems);
+    };
+    positionItems(start);
+    return () => cancelAnimationFrame(frame);
+  }, [count]);
+  return <div className="orbit-plane" ref={planeRef}>{children}</div>;
 }
 
-const Panel = ({ items, sections, mobile, title }) => {
-  const hasSections = Array.isArray(sections);
-  const safeItems = Array.isArray(items) ? items : [];
-  // Limit height so large menus stay within the viewport and enable scrolling
+function LinkNode({ link, index, total }) {
+  const knownLogo = link.id === "github" ? <FaGithub /> : link.id === "substack" ? <SiSubstack /> : link.id === "linkedin" ? <FaLinkedinIn /> : link.id === "ethpapers" ? <img src="/ethpapers-logo-cutout.png" alt="" /> : null;
   return (
-    <Motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 6 }}
-      transition={{ type: "spring", stiffness: 320, damping: 28 }}
-      className={
-        "pointer-events-auto rounded-2xl bg-black/85 p-4 backdrop-blur-md border border-emerald-300/30 shadow-[0_0_30px_rgba(140,255,200,0.25)] max-h-[calc(100vh-4rem)] overflow-y-auto " +
-        (mobile ? "w-[min(26rem,calc(100vw-2rem))]" : "w-[min(18rem,calc(100vw-3rem))]")
-      }
-      role="menu"
-    >
-      {title && (
-        <div className="mb-2 text-emerald-200/90 text-xs tracking-widest uppercase">
-          {title}
-        </div>
-      )}
+    <div className="orbit-item" data-orbit-index={index} data-orbit-total={total}>
+      <a className="link-node" href={link.url} target="_blank" rel="noreferrer" aria-label={`${link.label} (opens in a new tab)`}>
+        <Motion.span className={`link-glyph ${knownLogo ? "painted-logo" : ""}`} initial={{ opacity: 0, scale: 0.7 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.35 + index * 0.08, duration: 0.6 }}>{knownLogo || <CustomIcon name={link.icon} aria-hidden="true" />}</Motion.span>
+        <span className="link-label">{link.label}<FiExternalLink aria-hidden="true" /></span>
+      </a>
+    </div>
+  );
+}
 
-      {!hasSections && (
-        <ul className="space-y-2">
-          {safeItems.map((it) => {
-            const external = /^https?:\/\//.test(it?.href || "");
-            return (
-              <li key={it?.label}>
-                <a
-                  href={it?.href || "#"}
-                  target={external ? "_blank" : undefined}
-                  rel={external ? "noopener noreferrer" : undefined}
-                  className="block rounded-lg border border-emerald-400/10 bg-emerald-100/0 px-3 py-2 text-emerald-100/90 hover:bg-emerald-400/5 hover:text-emerald-100 transition"
-                >
-                  {it?.label || "(untitled)"}
-                </a>
-              </li>
-            );
-          })}
-        </ul>
-      )}
-
-      {hasSections && (
-        <div className="space-y-4">
-          {sections.map((sec, idx) => (
-            <div key={idx}>
-              {!!(sec.subtitle && String(sec.subtitle).trim()) && (
-                <div className="mb-1 text-[11px] text-emerald-200/80">
-                  {sec.subtitle}
-                </div>
-              )}
-              <ul className="space-y-2">
-                {(sec.items || []).map((it) => {
-                  const external = /^https?:\/\//.test(it?.href || "");
-                  return (
-                    <li key={it?.label}>
-                      <a
-                        href={it?.href || "#"}
-                        target={external ? "_blank" : undefined}
-                        rel={external ? "noopener noreferrer" : undefined}
-                        className="block rounded-lg border border-emerald-400/10 bg-emerald-100/0 px-3 py-2 text-emerald-100/90 hover:bg-emerald-400/5 hover:text-emerald-100 transition"
-                      >
-                        {it?.label || "(untitled)"}
-                      </a>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          ))}
-        </div>
-      )}
+function LoginDialog({ onClose, onMessage }) {
+  const [email, setEmail] = useState("");
+  const [sending, setSending] = useState(false);
+  async function submit(event) {
+    event.preventDefault();
+    if (!supabaseConfigured) return onMessage("Connect Supabase first. See SETUP.md.");
+    setSending(true);
+    const { error } = await supabase.auth.signInWithOtp({ email, options: { emailRedirectTo: window.location.origin, shouldCreateUser: false } });
+    setSending(false);
+    if (error) onMessage(error.message);
+    else { onMessage("Check your email for the private sign-in link."); onClose(); }
+  }
+  return (
+    <Motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={onClose}>
+      <Motion.section className="admin-panel login-panel" role="dialog" aria-modal="true" aria-labelledby="login-title" initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 18, opacity: 0 }} onMouseDown={(e) => e.stopPropagation()}>
+        <button className="close-button" onClick={onClose} aria-label="Close login"><FiX /></button>
+        <p className="eyebrow">Private access</p><h2 id="login-title">Site editor</h2>
+        <p className="panel-copy">Enter the owner email to receive a secure sign-in link.</p>
+        <form onSubmit={submit} className="editor-form">
+          <label>Email<input autoFocus required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></label>
+          <button className="primary-button" disabled={sending}>{sending ? "Sending…" : "Send login link"}</button>
+        </form>
+      </Motion.section>
     </Motion.div>
   );
-};
+}
 
-const Glow = ({ className }) => (
-  <div
-    className={`absolute inset-0 blur-xl opacity-70 ${className || ""}`}
-    style={{ boxShadow: `0 0 60px 10px ${GLOW}, inset 0 0 40px ${GLOW}` }}
-  />
-);
-
-function ShapeTriangle() {
+function Editor({ links, mediaUrl, onClose, onRefresh, onMessage }) {
+  const [form, setForm] = useState({ label: "", url: "https://", icon: "globe" });
+  const [media, setMedia] = useState(mediaUrl);
+  const [saving, setSaving] = useState(false);
+  async function addLink(event) {
+    event.preventDefault(); setSaving(true);
+    const { error } = await supabase.from("links").insert({ ...form, sort_order: links.length });
+    setSaving(false);
+    if (error) return onMessage(error.message);
+    setForm({ label: "", url: "https://", icon: "globe" }); onRefresh();
+  }
+  async function removeLink(id) {
+    const { error } = await supabase.from("links").delete().eq("id", id);
+    if (error) return onMessage(error.message); onRefresh();
+  }
+  async function signOut() { await supabase.auth.signOut(); onClose(); }
+  async function saveMedia(event) {
+    event.preventDefault();
+    const { error } = await supabase.from("site_settings").update({ media_url: media }).eq("id", "default");
+    if (error) return onMessage(error.message);
+    onMessage("Media updated."); onRefresh();
+  }
   return (
-    <div className="relative w-32 h-32 md:w-40 md:h-40">
-      <svg viewBox="0 0 100 100" className="w-full h-full">
-        <polygon points="50,10 90,80 10,80" fill="none" strokeWidth="4" stroke="url(#grad)" />
-        <defs>
-          <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor={GLOW} />
-            <stop offset="100%" stopColor="white" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <Glow />
-    </div>
+    <Motion.div className="modal-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={onClose}>
+      <Motion.section className="admin-panel" role="dialog" aria-modal="true" aria-labelledby="editor-title" initial={{ y: 24, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 18, opacity: 0 }} onMouseDown={(e) => e.stopPropagation()}>
+        <button className="close-button" onClick={onClose} aria-label="Close editor"><FiX /></button>
+        <p className="eyebrow">Authenticated</p><h2 id="editor-title">Edit destinations</h2>
+        <div className="existing-links">{links.map((link) => <div className="existing-link" key={link.id}><CustomIcon name={link.icon} /><span>{link.label}</span><button onClick={() => removeLink(link.id)} aria-label={`Delete ${link.label}`}><FiTrash2 /></button></div>)}</div>
+        <form onSubmit={addLink} className="editor-form">
+          <label>Name<input required maxLength="40" value={form.label} onChange={(e) => setForm({ ...form, label: e.target.value })} placeholder="New destination" /></label>
+          <label>URL<input required type="url" value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} /></label>
+          <label>Icon bank<span className="icon-bank">{CUSTOM_ICON_NAMES.map((icon) => <button type="button" className={form.icon === icon ? "selected" : ""} key={icon} onClick={() => setForm({ ...form, icon })} aria-label={`Use ${icon} icon`} title={icon}><CustomIcon name={icon} /></button>)}</span></label>
+          <button className="primary-button" disabled={saving}>{saving ? "Adding…" : "Add destination"}</button>
+        </form>
+        <form onSubmit={saveMedia} className="editor-form media-form"><label>Playing media URL<input required type="url" value={media} onChange={(e) => setMedia(e.target.value)} /></label><button className="secondary-button">Update media</button></form>
+        <button className="signout-button" onClick={signOut}><FiLogOut /> Sign out</button>
+      </Motion.section>
+    </Motion.div>
   );
 }
 
-function ShapeSquare() {
-  return (
-    <div className="relative w-32 h-32 md:w-40 md:h-40">
-      <svg viewBox="0 0 100 100" className="w-full h-full">
-        <rect x="10" y="10" width="80" height="80" fill="none" strokeWidth="4" stroke={GLOW} />
-      </svg>
-      <Glow />
-    </div>
-  );
+function MediaBar({ url }) {
+  const player = useYouTubePlayer(url);
+  return <div className="media-bar" aria-label="Media controls">
+    <div className="youtube-host" ref={player.hostRef} />
+    <button onClick={player.togglePlay} disabled={!player.ready} aria-label={player.playing ? "Pause" : "Play"}>{player.playing ? <FiPause /> : <FiPlay />}</button>
+    <button onClick={player.restart} disabled={!player.ready} aria-label="Restart from beginning" title="Restart"><FiRotateCcw /></button>
+    <button onClick={player.toggleMute} disabled={!player.ready} aria-label={player.muted ? "Unmute" : "Mute"}>{player.muted ? <FiVolumeX /> : <FiVolume2 />}</button>
+    <input aria-label="Volume" type="range" min="0" max="100" value={player.volume} onChange={(e) => player.setVolume(e.target.value)} />
+    <a href={url} target="_blank" rel="noreferrer" aria-label="Open media on YouTube"><FiExternalLink /></a>
+  </div>;
 }
-
-function ShapeCircle() {
-  return (
-    <div className="relative w-32 h-32 md:w-40 md:h-40">
-      <svg viewBox="0 0 100 100" className="w-full h-full">
-        <circle cx="50" cy="50" r="40" fill="none" strokeWidth="4" stroke={GLOW} />
-      </svg>
-      <Glow />
-    </div>
-  );
-}
-
-function ShapeCross() {
-  return (
-    <div className="relative w-44 h-44 md:w-52 md:h-52">
-      <svg viewBox="0 0 100 100" className="w-full h-full">
-        <path
-          d="M20 38 L38 20 L50 32 L62 20 L80 38 L68 50 L80 62 L62 80 L50 68 L38 80 L20 62 L32 50 Z"
-          fill="none"
-          strokeWidth="4"
-          stroke={GLOW}
-        />
-      </svg>
-      <Glow />
-    </div>
-  );
-}
-
-const ControllerNode = ({ shape, items, sections, anchor, title, active, setActive }) => {
-  const isMobile = useIsMobile();
-  const open = active === shape;
-
-  const ShapeComp = {
-    triangle: ShapeTriangle,
-    square: ShapeSquare,
-    circle: ShapeCircle,
-    cross: ShapeCross,
-  }[shape];
-
-  const panelPos = {
-    top: "top-[calc(100%+16px)] left-1/2 -translate-x-1/2",
-    right: "right-[calc(100%+16px)] top-1/2 -translate-y-1/2",
-    left: "left-[calc(100%+16px)] top-1/2 -translate-y-1/2",
-    bottom: "bottom-[calc(100%+16px)] left-1/2 -translate-x-1/2",
-  }[anchor];
-
-  // On mobile, render menus fixed at the bottom center so they never clip off-screen
-  const containerPos = isMobile
-    ? "fixed bottom-4 left-1/2 -translate-x-1/2"
-    : `absolute ${panelPos}`;
-
-  const handlers = isMobile
-    ? {
-        onClick: (e) => {
-          e.stopPropagation();
-          setActive(open ? null : shape);
-        },
-      }
-    : {
-        onMouseEnter: () => setActive(shape),
-        onMouseLeave: () => setActive(null),
-        onClick: (e) => e.stopPropagation(),
-      };
-
-  return (
-    <div className="group relative flex flex-col items-center justify-center" {...handlers}>
-      <Motion.div
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.98 }}
-        className="cursor-pointer select-none"
-        aria-haspopup="menu"
-        aria-expanded={open}
-      >
-        <ShapeComp />
-      </Motion.div>
-
-      <AnimatePresence>
-        {open && (
-          <div className={`${containerPos} pointer-events-none`}>
-            <Panel items={items} sections={sections} mobile={isMobile} title={title} />
-          </div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
 
 export default function App() {
-  const [active, setActive] = React.useState(null);
-  const TRI = getGroup("triangle");
-  const SQU = getGroup("square");
-  const CIR = getGroup("circle");
-  const CRO = getGroup("cross");
-
-  React.useEffect(() => {
-    const close = () => setActive(null);
-    window.addEventListener("resize", close);
-    return () => window.removeEventListener("resize", close);
+  const [links, setLinks] = useState(DEFAULT_LINKS);
+  const [session, setSession] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
+  const [message, setMessage] = useState("");
+  const [mediaUrl, setMediaUrl] = useState(DEFAULT_MEDIA_URL);
+  const orderedLinks = useMemo(() => [...links].sort((a, b) => a.sort_order - b.sort_order), [links]);
+  const orbitCount = orderedLinks.length + (ENABLE_ADMIN && isAdmin ? 1 : 0);
+  async function loadLinks() {
+    if (!supabaseConfigured) return;
+    const { data, error } = await supabase.from("links").select("id,label,url,icon,sort_order").order("sort_order");
+    if (!error && data) setLinks(data);
+  }
+  async function loadSettings() {
+    if (!supabaseConfigured) return;
+    const { data } = await supabase.from("site_settings").select("media_url").eq("id", "default").maybeSingle();
+    if (data?.media_url) setMediaUrl(data.media_url);
+  }
+  async function checkAdmin(activeSession) {
+    if (!activeSession || !supabaseConfigured) return setIsAdmin(false);
+    const { data } = await supabase.from("site_admins").select("user_id").eq("user_id", activeSession.user.id).maybeSingle();
+    setIsAdmin(Boolean(data));
+  }
+  useEffect(() => {
+    loadLinks(); loadSettings();
+    if (!ENABLE_ADMIN || !supabaseConfigured) return undefined;
+    supabase.auth.getSession().then(({ data }) => { setSession(data.session); checkAdmin(data.session); });
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => { setSession(nextSession); setTimeout(() => checkAdmin(nextSession), 0); });
+    return () => listener.subscription.unsubscribe();
   }, []);
-
+  useEffect(() => { if (!message) return; const timeout = setTimeout(() => setMessage(""), 5000); return () => clearTimeout(timeout); }, [message]);
   return (
-    <ErrorBoundary>
-      <main
-        className="relative min-h-screen text-emerald-100 bg-black overflow-hidden"
-        onClick={() => setActive(null)}
-      >
-        <div className="pointer-events-none absolute inset-0 opacity-30">
-          <GridDecor />
-        </div>
-
-        <header className="relative z-10 flex items-center justify-between px-4 md:px-6 pt-6">
-          <h1 className="font-mono tracking-wider text-xs md:text-sm text-emerald-200/70">
-            KICHONG.XYZ
-          </h1>
-          <div className="text-[10px] font-mono text-emerald-400/60">v0.1</div>
-        </header>
-
-        <section className="relative z-10 grid place-items-center pt-6 md:pt-10">
-          <div className="relative w-full max-w-[900px] aspect-[1.1] md:aspect-[1.4] mx-auto">
-            <div className="absolute inset-0 grid grid-cols-3 grid-rows-3">
-              <div />
-              <div className="flex items-center justify-center">
-                <ControllerNode
-                  shape="triangle"
-                  items={TRI.items}
-                  sections={TRI.sections}
-                  anchor="top"
-                  title={TRI.title}
-                  active={active}
-                  setActive={setActive}
-                />
-              </div>
-              <div />
-              <div className="flex items-center justify-center">
-                <ControllerNode
-                  shape="square"
-                  items={SQU.items}
-                  sections={SQU.sections}
-                  anchor="left"
-                  title={SQU.title}
-                  active={active}
-                  setActive={setActive}
-                />
-              </div>
-              <div />
-              <div className="flex items-center justify-center">
-                <ControllerNode
-                  shape="circle"
-                  items={CIR.items}
-                  sections={CIR.sections}
-                  anchor="right"
-                  title={CIR.title}
-                  active={active}
-                  setActive={setActive}
-                />
-              </div>
-              <div />
-              <div className="flex items-center justify-center">
-                <ControllerNode
-                  shape="cross"
-                  items={CRO.items}
-                  sections={CRO.sections}
-                  anchor="bottom"
-                  title={CRO.title}
-                  active={active}
-                  setActive={setActive}
-                />
-              </div>
-              <div />
-            </div>
-          </div>
-        </section>
-
-        <div className="pointer-events-none absolute inset-0 mix-blend-screen opacity-25">
-          <Scanlines />
-        </div>
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_center,transparent,rgba(0,0,0,0.7))]" />
-
-      </main>
-    </ErrorBoundary>
+    <main className="site-shell">
+      <div className="ambient-glow" aria-hidden="true" />
+      <div className="fire-stage" aria-hidden="true"><img className="fire fire-state-a" src="/fire-shape-a-alpha-v3.png" alt="" /><img className="fire fire-state-b" src="/fire-shape-b-alpha-v3.png" alt="" /><img className="fire fire-spark" src="/fire-shape-a-alpha-v3.png" alt="" /></div>
+      <nav className="orbit" aria-label="Destinations">
+        <OrbitPlane count={orbitCount}>
+          {orderedLinks.map((link, index) => <LinkNode key={link.id} link={link} index={index} total={orbitCount} />)}
+          {ENABLE_ADMIN && isAdmin && <div className="orbit-item" data-orbit-index={orderedLinks.length} data-orbit-total={orbitCount}><button className="link-node add-node" onClick={() => setShowEditor(true)} aria-label="Add a destination"><FiPlus /></button></div>}
+        </OrbitPlane>
+      </nav>
+      <MediaBar url={mediaUrl} />
+      <Motion.a className="wordmark" href="/" aria-label="Kichong home" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1 }}>KICHONG.XYZ</Motion.a>
+      {ENABLE_ADMIN && !session && <button className="quiet-login" onClick={() => setShowLogin(true)}>login</button>}
+      {ENABLE_ADMIN && session && !isAdmin && <button className="quiet-login" onClick={() => supabase.auth.signOut()}>not authorized</button>}
+      <AnimatePresence>
+        {ENABLE_ADMIN && showLogin && <LoginDialog onClose={() => setShowLogin(false)} onMessage={setMessage} />}
+        {ENABLE_ADMIN && showEditor && <Editor links={orderedLinks} mediaUrl={mediaUrl} onClose={() => setShowEditor(false)} onRefresh={() => { loadLinks(); loadSettings(); }} onMessage={setMessage} />}
+        {message && <Motion.div className="toast" role="status" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>{message}</Motion.div>}
+      </AnimatePresence>
+    </main>
   );
 }
-
-const GridDecor = () => (
-  <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-    <rect x="1" y="1" width="98" height="98" fill="none" stroke="rgba(140,255,200,0.6)" strokeWidth="0.6" />
-    {[25, 50, 75].map((p) => (
-      <g key={p}>
-        <line x1={p} y1="1" x2={p} y2="99" stroke="rgba(140,255,200,0.2)" strokeWidth="0.4" />
-        <line x1="1" y1={p} x2="99" y2={p} stroke="rgba(140,255,200,0.2)" strokeWidth="0.4" />
-      </g>
-    ))}
-  </svg>
-);
-
-const Scanlines = () => (
-  <div
-    className="absolute inset-0"
-    style={{
-      backgroundImage:
-        "repeating-linear-gradient(0deg, rgba(140,255,200,0.12) 0px, rgba(140,255,200,0.12) 1px, rgba(0,0,0,0) 2px)",
-      animation: "scan 8s linear infinite",
-    }}
-  />
-);

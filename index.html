@@ -5,10 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#030201" />
     <meta name="description" content="Writing, projects, and links from Ki Chong Tran." />
+    <link rel="preload" href="/fire-a-v2.webp" as="image" type="image/webp" fetchpriority="high" />
+    <link rel="stylesheet" href="/src/index.css" />
     <title>KICHONG.XYZ</title>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <main class="site-shell">
+      <div class="ambient-glow" aria-hidden="true"></div>
+      <div class="fire-stage" aria-hidden="true">
+        <img class="fire fire-state-a" src="/fire-a-v2.webp" alt="" fetchpriority="high" decoding="async" />
+        <img class="fire fire-state-b" src="/fire-b-v2.webp" alt="" decoding="async" />
+        <img class="fire fire-spark" src="/fire-a-v2.webp" alt="" decoding="async" />
+      </div>
+      <nav class="orbit" aria-label="Destinations">
+        <div class="orbit-plane">
+          <div class="orbit-item orbit-top"><a class="link-node" href="https://ethpapers.xyz/" target="_blank" rel="noreferrer" aria-label="Ethereum Papers (opens in a new tab)"><span class="link-glyph painted-logo"><img src="/ethpapers-logo-v2.webp" alt="" /></span><span class="link-label">Ethereum Papers <span aria-hidden="true">↗</span></span></a></div>
+          <div class="orbit-item orbit-right"><a class="link-node" href="https://kichongtran.substack.com/" target="_blank" rel="noreferrer" aria-label="Substack (opens in a new tab)"><span class="link-glyph painted-logo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22.539 8.242H1.46V5.406h21.08v2.836zM1.46 10.812V24L12 18.11 22.54 24V10.812H1.46zM22.54 0H1.46v2.836h21.08V0z"/></svg></span><span class="link-label">Substack <span aria-hidden="true">↗</span></span></a></div>
+          <div class="orbit-item orbit-bottom"><a class="link-node" href="https://github.com/kichong" target="_blank" rel="noreferrer" aria-label="GitHub (opens in a new tab)"><span class="link-glyph painted-logo"><svg viewBox="0 0 496 512" aria-hidden="true"><path d="M244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4-70 15-84.7-29.8-84.7-29.8-11.4-29.1-27.8-36.6-27.8-36.6-22.9-15.7 1.6-15.4 1.6-15.4 24.9 2 38.6 25.8 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 40-11.3 85.6-11.3 125.6 0 0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8z"/></svg></span><span class="link-label">GitHub <span aria-hidden="true">↗</span></span></a></div>
+          <div class="orbit-item orbit-left"><a class="link-node" href="https://www.linkedin.com/in/kichongtran/" target="_blank" rel="noreferrer" aria-label="LinkedIn (opens in a new tab)"><span class="link-glyph painted-logo"><svg viewBox="0 0 448 512" aria-hidden="true"><path d="M100.28 448H7.4V148.9h92.88zM53.79 108.1C24.09 108.1 0 83.5 0 53.8a53.79 53.79 0 01107.58 0c0 29.7-24.1 54.3-53.79 54.3zM447.9 448h-92.68V302.4c0-34.7-.7-79.2-48.29-79.2-48.29 0-55.69 37.7-55.69 76.7V448h-92.78V148.9h89.08v40.8h1.3c12.4-23.5 42.69-48.3 87.88-48.3 94 0 111.28 61.9 111.28 142.3V448z"/></svg></span><span class="link-label">LinkedIn <span aria-hidden="true">↗</span></span></a></div>
+        </div>
+      </nav>
+      <a class="wordmark" href="/" aria-label="Kichong home">KICHONG.XYZ</a>
+    </main>
   </body>
 </html>

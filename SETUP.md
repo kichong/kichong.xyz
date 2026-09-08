@@ -11,4 +11,4 @@ The public site works immediately with the four example destinations. Persistent
 
 The publishable key is intentionally safe to expose in frontend code. Authorization is enforced in Postgres by row-level security; never place the Supabase service-role key in this project or in a `VITE_` variable.
 
-The subdued `login` control is in the bottom-right corner. After the owner follows the emailed magic link, a `+` appears among the destinations and opens the editor. The editor includes the reusable custom icon bank and the playing-media URL. Signed-out visitors never receive write permission and never see the `+`.
+The dormant editor includes passwordless owner access, a private `+` control, and the reusable custom icon bank. These controls are intentionally disconnected from the current public build. If re-enabled in a later iteration, signed-out visitors should retain public read access without receiving write permission or seeing the editor controls.

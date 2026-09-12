@@ -11,7 +11,13 @@
   </head>
   <body>
     <main class="site-shell">
-      <div class="ambient-glow" aria-hidden="true"></div>
+      <div class="ambient-glow" aria-hidden="true">
+        <div class="glow-layer glow-core"></div>
+        <div class="glow-layer glow-upper"></div>
+        <div class="glow-layer glow-left"></div>
+        <div class="glow-layer glow-right"></div>
+        <div class="glow-layer glow-lower"></div>
+      </div>
       <div class="fire-stage" aria-hidden="true">
         <img class="fire fire-state-a" src="/fire-a-v2.webp" alt="" fetchpriority="high" decoding="async" />
         <img class="fire fire-state-b" src="/fire-b-v2.webp" alt="" decoding="async" />
@@ -27,6 +33,7 @@
       </nav>
       <a class="wordmark" href="/" aria-label="Kichong home">KICHONG.XYZ</a>
     </main>
+    <script type="module" src="/src/fire.js"></script>
     <script>
         (() => {
           const links = [...document.querySelectorAll(".link-node")];
